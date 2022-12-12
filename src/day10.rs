@@ -1,7 +1,7 @@
 use crate::{bail, Aoc, Day10, Result};
 
-impl Aoc<String> for Day10 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<String> {
+impl Aoc<i32, String> for Day10 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<i32> {
         let instructions = parse(lines)?;
 
         let instructions = instructions.into_iter().flat_map(|i| match i {
@@ -30,7 +30,7 @@ impl Aoc<String> for Day10 {
             })
             .sum();
 
-        Ok(res.to_string())
+        Ok(res)
     }
 
     fn part2(&self, lines: &[&[u8]]) -> Result<String> {
