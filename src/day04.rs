@@ -1,19 +1,20 @@
-use crate::{bail, Aoc, Day04, Result};
+use crate::{bail, Aoc, Day04, Display, Result};
 
-impl Aoc<u32> for Day04 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
-        lines
+impl Aoc for Day04 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+        let res: Result<u32> = lines
             .iter()
-            .map(|l| {
-                if let [a, b, x, y] = parse_line(l)?[..] {
-                    Ok(u32::from((a <= x && y <= b) || (x <= a && b <= y)))
-                } else {
-                    bail!("parse error")
-                }
+            .map::<Result<u32>, _>(|l| {
+                let [a, b, x, y] = parse_line(l)?[..] else {
+                    bail!("parse error");
+                };
+                Ok(u32::from((a <= x && y <= b) || (x <= a && b <= y)))
             })
-            .sum()
+            .sum();
+        result!(res?)
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<u32> {
+
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut res = 0;
         for l in lines {
             if let [a, b, x, y] = parse_line(l)?[..] {
@@ -24,7 +25,7 @@ impl Aoc<u32> for Day04 {
                 bail!("parse error");
             }
         }
-        Ok(res)
+        result!(res)
     }
 }
 

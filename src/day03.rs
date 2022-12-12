@@ -1,7 +1,7 @@
-use crate::{Aoc, Day03, Result};
+use crate::{Aoc, Day03, Display, Result};
 
-impl Aoc<u32> for Day03 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
+impl Aoc for Day03 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut res = 0;
         for l in lines {
             let mut count: Vec<u32> = vec![0; 128];
@@ -21,10 +21,10 @@ impl Aoc<u32> for Day03 {
                 }
             }
         }
-        Ok(res)
+        result!(res)
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<u32> {
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut res = 0;
         for ll in lines.chunks(3) {
             let mut counts: Vec<Vec<u32>> = Vec::new();
@@ -47,6 +47,6 @@ impl Aoc<u32> for Day03 {
                 }
             }
         }
-        Ok(res)
+        result!(res)
     }
 }

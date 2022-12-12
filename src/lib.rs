@@ -1,4 +1,11 @@
 use color_eyre::eyre::*;
+use std::fmt::Display;
+
+macro_rules! result {
+    ($res: expr) => {
+        Ok(Box::new($res))
+    };
+}
 
 mod day01;
 mod day02;
@@ -26,13 +33,9 @@ pub struct Day10;
 pub struct Day11;
 pub struct Day12;
 
-pub trait Aoc<T, U = T>
-where
-    T: std::fmt::Display,
-    U: std::fmt::Display,
-{
-    fn part1(&self, lines: &[&[u8]]) -> Result<T>;
-    fn part2(&self, lines: &[&[u8]]) -> Result<U>;
+pub trait Aoc {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>>;
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>>;
     fn run<P: AsRef<std::path::Path>>(&self, fpath: P) -> Result<()> {
         let input = std::fs::read(fpath)?;
 

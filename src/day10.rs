@@ -1,7 +1,7 @@
-use crate::{bail, Aoc, Day10, Result};
+use crate::{bail, Aoc, Day10, Display, Result};
 
-impl Aoc<i32, String> for Day10 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<i32> {
+impl Aoc for Day10 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let instructions = parse(lines)?;
 
         let instructions = instructions.into_iter().flat_map(|i| match i {
@@ -30,10 +30,10 @@ impl Aoc<i32, String> for Day10 {
             })
             .sum();
 
-        Ok(res)
+        result!(res)
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<String> {
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let instructions = parse(lines)?;
 
         let instructions = instructions.into_iter().flat_map(|i| match i {
@@ -66,7 +66,7 @@ impl Aoc<i32, String> for Day10 {
             res.push_str(row);
         }
 
-        Ok(res)
+        result!(res)
     }
 }
 

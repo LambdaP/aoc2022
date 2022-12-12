@@ -1,4 +1,4 @@
-use crate::{bail, Aoc, Day11, Result};
+use crate::{bail, Aoc, Day11, Display, Result};
 use std::collections::VecDeque;
 
 // shape of input: list of
@@ -23,8 +23,8 @@ enum Operator {
     Times,
 }
 
-impl Aoc<usize> for Day11 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<usize> {
+impl Aoc for Day11 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut monkeys: Vec<Monkey> = parse(lines)?;
         let mut counts: Vec<usize> = vec![0; monkeys.len()];
         for _ in 0..20 {
@@ -46,9 +46,10 @@ impl Aoc<usize> for Day11 {
         let [x,y] = counts.windows(2).last().unwrap()[..] else {
             panic!();
         };
-        Ok(x * y)
+        result!(x * y)
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<usize> {
+
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut monkeys: Vec<Monkey> = parse(lines)?;
         let mut counts: Vec<usize> = vec![0; monkeys.len()];
         let charac: usize = monkeys.iter().map(|m| m.divisor).product();
@@ -71,7 +72,8 @@ impl Aoc<usize> for Day11 {
         let [x,y] = counts.windows(2).last().unwrap()[..] else {
             panic!();
         };
-        Ok(x * y)
+
+        result!(x * y)
     }
 }
 

@@ -2,6 +2,7 @@ use crate::{eyre, Aoc, Day12, Result};
 use std::collections::hash_set::HashSet as Set;
 use std::collections::BinaryHeap as Heap;
 use std::collections::HashMap as Map;
+use std::fmt::Display;
 
 #[derive(Copy, Clone, PartialEq, Hash, Eq, Ord, PartialOrd)]
 struct Point {
@@ -31,8 +32,8 @@ impl PartialOrd for State {
     }
 }
 
-impl Aoc<usize> for Day12 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<usize> {
+impl Aoc for Day12 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let (start, end) = locate_start_end(lines).unwrap();
 
         let paths = dijkstra(lines, start, |cur_el, el| el <= cur_el + 1);
@@ -40,18 +41,21 @@ impl Aoc<usize> for Day12 {
             .get(&end)
             .ok_or_else(|| eyre!("no path to end point"))?;
 
-        Ok(*res)
+        result!(*res)
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<usize> {
+
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let (_, end) = locate_start_end(lines).unwrap();
 
         let paths = dijkstra(lines, end, |cur_el, el| cur_el <= el + 1);
 
-        paths
+        let res = paths
             .into_values()
             .filter_map(|(e, c)| (e == b'a').then_some(c))
             .min()
-            .ok_or_else(|| eyre!("no path from lowest elevation"))
+            .ok_or_else(|| eyre!("no path from lowest elevation"));
+
+        result!(res?)
     }
 }
 

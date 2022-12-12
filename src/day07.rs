@@ -1,4 +1,4 @@
-use crate::{bail, Aoc, Day07, Result};
+use crate::{bail, Aoc, Day07, Display, Result};
 
 use std::collections::hash_map::HashMap;
 
@@ -38,18 +38,20 @@ impl File {
     }
 }
 
-impl Aoc<usize> for Day07 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<usize> {
+impl Aoc for Day07 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut files = parse(lines)?;
         compute_size(&mut files, 0)?;
-        let res = files
+        let res: usize = files
             .iter()
             .filter_map(|f| f.is_dir.then_some(f.size?))
             .filter(|&u| u <= 100000)
-            .sum::<usize>();
-        Ok(res)
+            .sum();
+
+        result!(res)
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<usize> {
+
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut files = parse(lines)?;
         compute_size(&mut files, 0)?;
         let root_size = files[0].size.unwrap();
@@ -61,7 +63,8 @@ impl Aoc<usize> for Day07 {
             .filter(|&u| u >= needed)
             .min()
             .unwrap();
-        Ok(res)
+
+        result!(res)
     }
 }
 

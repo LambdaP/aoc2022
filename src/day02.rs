@@ -1,13 +1,11 @@
-use crate::{bail, eyre, Aoc, Day02, Result};
+use crate::{bail, eyre, Aoc, Day02, Display, Result};
 
-impl Aoc<u32> for Day02 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
-        let games = parse_part1(lines)?;
-        Ok(score(games))
+impl Aoc for Day02 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+        result!(score(parse_part1(lines)?))
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<u32> {
-        let games = parse_part2(lines)?;
-        Ok(score(games))
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+        result!(score(parse_part2(lines)?))
     }
 }
 

@@ -1,16 +1,16 @@
-use crate::{bail, Aoc, Day09, Result};
+use crate::{bail, Aoc, Day09, Display, Result};
 use std::collections::hash_set::HashSet as Set;
 
-impl Aoc<usize> for Day09 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<usize> {
+impl Aoc for Day09 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let moves = parse(lines)?;
         let res = run_nknots::<2>(&moves);
-        Ok(res)
+        result!(res)
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<usize> {
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let moves = parse(lines)?;
         let res = run_nknots::<10>(&moves);
-        Ok(res)
+        result!(res)
     }
 }
 

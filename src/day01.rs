@@ -1,13 +1,13 @@
-use crate::{Aoc, Day01, Result};
+use crate::{Aoc, Day01, Display, Result};
 
-impl Aoc<u32> for Day01 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
-        Ok(parse(lines)?.into_iter().max().unwrap())
+impl Aoc for Day01 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+        result!(parse(lines)?.into_iter().max().unwrap())
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<u32> {
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut elves: Vec<u32> = parse(lines)?;
         elves.sort_unstable();
-        Ok(elves.into_iter().rev().take(3).sum())
+        result!(elves.into_iter().rev().take(3).sum::<u32>())
     }
 }
 

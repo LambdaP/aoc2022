@@ -1,8 +1,8 @@
-use crate::{Aoc, Day08, Result};
+use crate::{Aoc, Day08, Display, Result};
 use std::collections::hash_set::HashSet as Set;
 
-impl Aoc<usize> for Day08 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<usize> {
+impl Aoc for Day08 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let height = lines.len();
         let width = lines[0].len();
         let mut visible = Set::<(usize, usize)>::new();
@@ -51,10 +51,10 @@ impl Aoc<usize> for Day08 {
             }
         }
 
-        Ok(visible.len())
+        result!(visible.len())
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<usize> {
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let height = lines.len();
         let width = lines[0].len();
 
@@ -63,7 +63,7 @@ impl Aoc<usize> for Day08 {
             .max()
             .unwrap();
 
-        Ok(res)
+        result!(res)
     }
 }
 

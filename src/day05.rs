@@ -1,7 +1,7 @@
-use crate::{eyre, Aoc, Day05, Result};
+use crate::{eyre, Aoc, Day05, Display, Result};
 
-impl Aoc<String> for Day05 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<String> {
+impl Aoc for Day05 {
+    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut parsed = None;
         for i in 0..lines.len() {
             if lines[i].is_empty() {
@@ -27,9 +27,10 @@ impl Aoc<String> for Day05 {
             }
         }
 
-        Ok(res)
+        result!(res)
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<String> {
+
+    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
         let mut parsed = None;
         for i in 0..lines.len() {
             if lines[i].is_empty() {
@@ -57,7 +58,7 @@ impl Aoc<String> for Day05 {
             }
         }
 
-        Ok(res)
+        result!(res)
     }
 }
 
