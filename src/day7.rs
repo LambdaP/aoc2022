@@ -75,15 +75,13 @@ fn parse(lines: &[&[u8]]) -> Result<Vec<File>> {
         let words = line.split_ascii_whitespace().collect::<Vec<&str>>();
         if words[0] == "$" {
             match words[1] {
-                "cd" => {
-                    match words[2] {
-                        "/" => pwd = 0,
-                        ".." => pwd = files[pwd].parent_id,
-                        s => {
-                            pwd = *(files[pwd].children.as_ref().unwrap().get(s).unwrap());
-                        }
+                "cd" => match words[2] {
+                    "/" => pwd = 0,
+                    ".." => pwd = files[pwd].parent_id,
+                    s => {
+                        pwd = *(files[pwd].children.as_ref().unwrap().get(s).unwrap());
                     }
-                }
+                },
                 "ls" => (),
                 _ => bail!("invalid command"),
             };
