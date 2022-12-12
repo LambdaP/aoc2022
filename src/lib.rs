@@ -26,7 +26,7 @@ pub struct Day10;
 pub struct Day11;
 pub struct Day12;
 
-pub trait Aoc<T, U=T>
+pub trait Aoc<T, U = T>
 where
     T: std::fmt::Display,
     U: std::fmt::Display,
