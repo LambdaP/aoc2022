@@ -1,6 +1,6 @@
-use crate::{eyre, Aoc, Day5, Result};
+use crate::{eyre, Aoc, Day05, Result};
 
-impl Aoc<String> for Day5 {
+impl Aoc<String> for Day05 {
     fn part1(&self, lines: &[&[u8]]) -> Result<String> {
         return part1(lines);
     }

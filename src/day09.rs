@@ -1,7 +1,7 @@
-use crate::{bail, Aoc, Day9, Result};
+use crate::{bail, Aoc, Day09, Result};
 use std::collections::hash_set::HashSet as Set;
 
-impl Aoc<usize> for Day9 {
+impl Aoc<usize> for Day09 {
     fn part1(&self, lines: &[&[u8]]) -> Result<usize> {
         let moves = parse(lines)?;
         let res = run_nknots::<2>(&moves);

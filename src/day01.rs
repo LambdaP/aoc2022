@@ -1,6 +1,6 @@
-use crate::{Aoc, Day1, Result};
+use crate::{Aoc, Day01, Result};
 
-impl Aoc<u32> for Day1 {
+impl Aoc<u32> for Day01 {
     fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
         Ok(parse(lines)?.into_iter().max().unwrap())
     }

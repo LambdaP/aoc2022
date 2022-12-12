@@ -1,26 +1,26 @@
 use color_eyre::eyre::*;
 
-mod day1;
+mod day01;
+mod day02;
+mod day03;
+mod day04;
+mod day05;
+mod day06;
+mod day07;
+mod day08;
+mod day09;
 mod day10;
 mod day11;
-mod day2;
-mod day3;
-mod day4;
-mod day5;
-mod day6;
-mod day7;
-mod day8;
-mod day9;
 
-pub struct Day1;
-pub struct Day2;
-pub struct Day3;
-pub struct Day4;
-pub struct Day5;
-pub struct Day6;
-pub struct Day7;
-pub struct Day8;
-pub struct Day9;
+pub struct Day01;
+pub struct Day02;
+pub struct Day03;
+pub struct Day04;
+pub struct Day05;
+pub struct Day06;
+pub struct Day07;
+pub struct Day08;
+pub struct Day09;
 pub struct Day10;
 pub struct Day11;
 

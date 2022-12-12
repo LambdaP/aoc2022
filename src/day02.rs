@@ -1,6 +1,6 @@
-use crate::{bail, eyre, Aoc, Day2, Result};
+use crate::{bail, eyre, Aoc, Day02, Result};
 
-impl Aoc<u32> for Day2 {
+impl Aoc<u32> for Day02 {
     fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
         let games = parse_part1(lines)?;
         Ok(score(games))

@@ -1,7 +1,7 @@
-use crate::{Aoc, Day8, Result};
+use crate::{Aoc, Day08, Result};
 use std::collections::hash_set::HashSet as Set;
 
-impl Aoc<usize> for Day8 {
+impl Aoc<usize> for Day08 {
     fn part1(&self, lines: &[&[u8]]) -> Result<usize> {
         let height = lines.len();
         let width = lines[0].len();

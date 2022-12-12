@@ -1,6 +1,6 @@
-use crate::{Aoc, Day3, Result};
+use crate::{Aoc, Day03, Result};
 
-impl Aoc<u32> for Day3 {
+impl Aoc<u32> for Day03 {
     fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
         return part1(lines);
     }

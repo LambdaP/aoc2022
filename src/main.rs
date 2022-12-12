@@ -15,15 +15,15 @@ macro_rules! run_day {
 }
 
 fn main() -> Result<()> {
-    run_day!(Day1);
-    run_day!(Day2);
-    run_day!(Day3);
-    run_day!(Day4);
-    run_day!(Day5);
-    run_day!(Day6);
-    run_day!(Day7);
-    run_day!(Day8);
-    run_day!(Day9);
+    run_day!(Day01);
+    run_day!(Day02);
+    run_day!(Day03);
+    run_day!(Day04);
+    run_day!(Day05);
+    run_day!(Day06);
+    run_day!(Day07);
+    run_day!(Day08);
+    run_day!(Day09);
     run_day!(Day10);
     run_day!(Day11);
 

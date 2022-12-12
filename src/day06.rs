@@ -1,6 +1,6 @@
-use crate::{bail, Aoc, Day6, Result};
+use crate::{bail, Aoc, Day06, Result};
 
-impl Aoc<u32> for Day6 {
+impl Aoc<u32> for Day06 {
     fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
         let l = lines[0];
         let mut count = 4;
