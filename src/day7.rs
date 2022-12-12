@@ -84,6 +84,7 @@ fn parse(lines: &[&[u8]]) -> Result<Vec<File>> {
                         }
                     }
                 }
+                "ls" => (),
                 _ => bail!("invalid command"),
             };
             continue;
