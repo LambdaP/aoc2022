@@ -25,6 +25,7 @@ fn main() -> Result<()> {
     run_day!(Day8);
     run_day!(Day9);
     run_day!(Day10);
+    run_day!(Day11);
 
     Ok(())
 }
