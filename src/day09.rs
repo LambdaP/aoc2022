@@ -62,17 +62,17 @@ fn move_rope<const NKNOTS: usize>(mut knots: [(isize, isize); NKNOTS]) -> [(isiz
 
         if hx - tx == 2 {
             tx += 1;
-            if ty < hy {
-                ty += 1;
-            } else if ty > hy {
-                ty -= 1;
+            match ty.cmp(&hy) {
+                std::cmp::Ordering::Greater => ty += 1,
+                std::cmp::Ordering::Less => ty -= 1,
+                _ => {}
             }
         } else if hx - tx == -2 {
             tx -= 1;
-            if ty < hy {
-                ty += 1;
-            } else if ty > hy {
-                ty -= 1;
+            match ty.cmp(&hy) {
+                std::cmp::Ordering::Greater => ty += 1,
+                std::cmp::Ordering::Less => ty -= 1,
+                _ => {}
             }
         } else if hy - ty == 2 {
             ty += 1;

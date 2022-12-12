@@ -7,21 +7,24 @@ impl Aoc<usize> for Day08 {
         let width = lines[0].len();
         let mut visible = Set::<(usize, usize)>::new();
 
-        for i in 0..height {
+        for (i, line) in lines.iter().enumerate() {
             visible.insert((i, 0));
             visible.insert((i, width - 1));
+
             let mut max_asc = 0;
             let mut max_desc = 0;
-            for j in 0..width {
-                if lines[i][j] > max_asc {
+
+            for (j, &x) in line.iter().enumerate() {
+                if x > max_asc {
                     visible.insert((i, j));
-                    max_asc = lines[i][j];
+                    max_asc = x;
                 }
             }
-            for j in (0..width).rev() {
-                if lines[i][j] > max_desc {
+
+            for (j, &x) in line.iter().enumerate().rev() {
+                if x > max_desc {
                     visible.insert((i, j));
-                    max_desc = lines[i][j];
+                    max_desc = x;
                 }
             }
         }
@@ -29,24 +32,28 @@ impl Aoc<usize> for Day08 {
         for j in 0..width {
             visible.insert((0, j));
             visible.insert((height - 1, j));
+
             let mut max_asc = 0;
             let mut max_desc = 0;
-            for i in 0..height {
-                if lines[i][j] > max_asc {
+
+            for (i, line) in lines.iter().enumerate() {
+                if line[j] > max_asc {
                     visible.insert((i, j));
-                    max_asc = lines[i][j];
+                    max_asc = line[j];
                 }
             }
-            for i in (0..height).rev() {
-                if lines[i][j] > max_desc {
+
+            for (i, line) in lines.iter().enumerate().rev() {
+                if line[j] > max_desc {
                     visible.insert((i, j));
-                    max_desc = lines[i][j];
+                    max_desc = line[j];
                 }
             }
         }
 
         Ok(visible.len())
     }
+
     fn part2(&self, lines: &[&[u8]]) -> Result<usize> {
         let height = lines.len();
         let width = lines[0].len();

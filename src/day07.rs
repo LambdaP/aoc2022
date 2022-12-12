@@ -26,7 +26,7 @@ impl File {
         }
     }
 
-    fn file(name: &str, id: Fid, parent_id: Fid, size: usize) -> File {
+    fn regular_file(name: &str, id: Fid, parent_id: Fid, size: usize) -> File {
         File {
             id,
             parent_id,
@@ -44,7 +44,7 @@ impl Aoc<usize> for Day07 {
         compute_size(&mut files, 0)?;
         let res = files
             .iter()
-            .filter_map(|f| if f.is_dir { f.size } else { None })
+            .filter_map(|f| f.is_dir.then_some(f.size?))
             .filter(|&u| u <= 100000)
             .sum::<usize>();
         Ok(res)
@@ -57,7 +57,7 @@ impl Aoc<usize> for Day07 {
         let needed = 30000000 - free_space;
         let res = files
             .iter()
-            .filter_map(|f| if f.is_dir { f.size } else { None })
+            .filter_map(|f| f.is_dir.then_some(f.size?))
             .filter(|&u| u >= needed)
             .min()
             .unwrap();
@@ -99,7 +99,7 @@ fn parse(lines: &[&[u8]]) -> Result<Vec<File>> {
             let children = files[pwd].children.as_mut().unwrap();
             if !children.contains_key(words[1]) {
                 children.insert(words[1].to_string(), fid);
-                files.push(File::file(words[1], fid, pwd, size));
+                files.push(File::regular_file(words[1], fid, pwd, size));
             }
         }
     }

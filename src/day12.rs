@@ -35,7 +35,7 @@ impl Aoc<usize> for Day12 {
     fn part1(&self, lines: &[&[u8]]) -> Result<usize> {
         let (start, end) = locate_start_end(lines).unwrap();
 
-        let paths = dijkstra(lines, start, |cur_el, el| { el <= cur_el + 1 });
+        let paths = dijkstra(lines, start, |cur_el, el| el <= cur_el + 1);
         let (_, res) = paths
             .get(&end)
             .ok_or_else(|| eyre!("no path to end point"))?;
@@ -45,7 +45,7 @@ impl Aoc<usize> for Day12 {
     fn part2(&self, lines: &[&[u8]]) -> Result<usize> {
         let (_, end) = locate_start_end(lines).unwrap();
 
-        let paths = dijkstra(lines, end, |cur_el, el| { cur_el <= el + 1 });
+        let paths = dijkstra(lines, end, |cur_el, el| cur_el <= el + 1);
 
         paths
             .into_values()
@@ -55,7 +55,11 @@ impl Aoc<usize> for Day12 {
     }
 }
 
-fn dijkstra(grid: &[&[u8]], source: Point, can_reach: fn(u8,u8) -> bool) -> Map<Point, (u8, usize)> {
+fn dijkstra(
+    grid: &[&[u8]],
+    source: Point,
+    can_reach: fn(u8, u8) -> bool,
+) -> Map<Point, (u8, usize)> {
     let mut res: Map<Point, (u8, usize)> = Map::new();
     let mut visited: Set<Point> = Set::new();
     let mut to_process: Heap<State> = Heap::new();
@@ -65,25 +69,33 @@ fn dijkstra(grid: &[&[u8]], source: Point, can_reach: fn(u8,u8) -> bool) -> Map<
             let el = match *b {
                 b'S' => b'a',
                 b'E' => b'z',
-                _ => *b
+                _ => *b,
             };
-            res.insert(Point{x,y},(el, usize::MAX));
+            res.insert(Point { x, y }, (el, usize::MAX));
         }
     }
 
     let &(source_el, _) = res.get(&source).unwrap();
     res.insert(source, (source_el, 0));
 
-    to_process.push(State { p: source, el: source_el, cost: 0 });
+    to_process.push(State {
+        p: source,
+        el: source_el,
+        cost: 0,
+    });
 
-    while let Some(State{p: cur, el: cur_el, cost: cur_cost}) = to_process.pop() {
+    while let Some(State {
+        p: cur,
+        el: cur_el,
+        cost: cur_cost,
+    }) = to_process.pop()
+    {
         for p in von_neumann(cur) {
             let Some(&(el, cost)) = res.get(&p) else {
                 continue;
             };
 
-            if !can_reach(cur_el, el) || visited.contains(&p) || cost <= cur_cost + 1
-            {
+            if !can_reach(cur_el, el) || visited.contains(&p) || cost <= cur_cost + 1 {
                 continue;
             }
 
@@ -110,9 +122,9 @@ fn von_neumann(point: Point) -> Vec<Point> {
         x.checked_sub(1).map(|x| Point { x, y }),
         y.checked_sub(1).map(|y| Point { x, y }),
     ]
-        .into_iter()
-        .flatten()
-        .collect()
+    .into_iter()
+    .flatten()
+    .collect()
 }
 
 fn locate_start_end(lines: &[&[u8]]) -> Option<(Point, Point)> {

@@ -2,71 +2,63 @@ use crate::{eyre, Aoc, Day05, Result};
 
 impl Aoc<String> for Day05 {
     fn part1(&self, lines: &[&[u8]]) -> Result<String> {
-        return part1(lines);
+        let mut parsed = None;
+        for i in 0..lines.len() {
+            if lines[i].is_empty() {
+                parsed = Some((&lines[0..i], &lines[i + 1..]));
+            }
+        }
+        let (crates, moves) = parsed.ok_or_else(|| eyre!("parse error"))?;
+        let mut crates = parse_crates(crates)?;
+        let moves = parse_moves(moves)?;
+
+        for (m, s, t) in moves {
+            for _ in 0..m {
+                let c = crates[s - 1].pop().ok_or_else(|| eyre!("error"))?;
+                crates[t - 1].push(c);
+            }
+        }
+
+        let mut res = String::new();
+
+        for mut cc in crates {
+            if let Some(top) = cc.pop() {
+                res.push(top as char);
+            }
+        }
+
+        Ok(res)
     }
     fn part2(&self, lines: &[&[u8]]) -> Result<String> {
-        return part2(lines);
-    }
-}
-
-pub fn part1(lines: &[&[u8]]) -> Result<String> {
-    let mut parsed = None;
-    for i in 0..lines.len() {
-        if lines[i].is_empty() {
-            parsed = Some((&lines[0..i], &lines[i + 1..]));
+        let mut parsed = None;
+        for i in 0..lines.len() {
+            if lines[i].is_empty() {
+                parsed = Some((&lines[0..i], &lines[i + 1..]));
+            }
         }
-    }
-    let (crates, moves) = parsed.ok_or_else(|| eyre!("parse error"))?;
-    let mut crates = parse_crates(crates)?;
-    let moves = parse_moves(moves)?;
+        let (crates, moves) = parsed.ok_or_else(|| eyre!("parse error"))?;
+        let mut crates = parse_crates(crates)?;
+        let moves = parse_moves(moves)?;
 
-    for (m, s, t) in moves {
-        for _ in 0..m {
-            let c = crates[s - 1].pop().ok_or_else(|| eyre!("error"))?;
-            crates[t - 1].push(c);
+        for (m, s, t) in moves {
+            let len = crates[s - 1].len();
+            let mut top = crates[s - 1].split_off(len - m);
+            crates[t - 1].append(&mut top);
+            // crates[t-1].drain(&crates[s-1][len-m..len]);
+            // let top = crates[s-1].rchunks(m).next().ok_or_else(|| eyre!("error"))?;
+            // crates[t-1].drain(top).collect();
         }
-    }
 
-    let mut res = String::new();
+        let mut res = String::new();
 
-    for mut cc in crates {
-        if let Some(top) = cc.pop() {
-            res.push(top as char);
+        for mut cc in crates {
+            if let Some(top) = cc.pop() {
+                res.push(top as char);
+            }
         }
+
+        Ok(res)
     }
-
-    Ok(res)
-}
-
-pub fn part2(lines: &[&[u8]]) -> Result<String> {
-    let mut parsed = None;
-    for i in 0..lines.len() {
-        if lines[i].is_empty() {
-            parsed = Some((&lines[0..i], &lines[i + 1..]));
-        }
-    }
-    let (crates, moves) = parsed.ok_or_else(|| eyre!("parse error"))?;
-    let mut crates = parse_crates(crates)?;
-    let moves = parse_moves(moves)?;
-
-    for (m, s, t) in moves {
-        let len = crates[s - 1].len();
-        let mut top = crates[s - 1].split_off(len - m);
-        crates[t - 1].append(&mut top);
-        // crates[t-1].drain(&crates[s-1][len-m..len]);
-        // let top = crates[s-1].rchunks(m).next().ok_or_else(|| eyre!("error"))?;
-        // crates[t-1].drain(top).collect();
-    }
-
-    let mut res = String::new();
-
-    for mut cc in crates {
-        if let Some(top) = cc.pop() {
-            res.push(top as char);
-        }
-    }
-
-    Ok(res)
 }
 
 fn parse_crates(lines: &[&[u8]]) -> Result<Vec<Vec<u8>>> {

@@ -43,7 +43,7 @@ fn score(games: Vec<(Move, Move)>) -> u32 {
 fn parse_part1(lines: &[&[u8]]) -> Result<Vec<(Move, Move)>> {
     let mut v = Vec::new();
     for l in lines {
-        let them = parse_move(b'A', *l.get(0).ok_or_else(|| eyre!("parse error"))?)?;
+        let them = parse_move(b'A', *l.first().ok_or_else(|| eyre!("parse error"))?)?;
         let me = parse_move(b'X', *l.get(2).ok_or_else(|| eyre!("parse error"))?)?;
 
         v.push((them, me));
@@ -81,7 +81,7 @@ fn parse_move(basis: u8, m: u8) -> Result<Move> {
 fn parse_part2(lines: &[&[u8]]) -> Result<Vec<(Move, Move)>> {
     let mut v = Vec::new();
     for l in lines {
-        let them = parse_move(b'A', *l.get(0).ok_or_else(|| eyre!("parse error"))?)?;
+        let them = parse_move(b'A', *l.first().ok_or_else(|| eyre!("parse error"))?)?;
         let me = match l.get(2).ok_or_else(|| eyre!("parse error"))? {
             b'X' => loses(them),
             b'Y' => them,

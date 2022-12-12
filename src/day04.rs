@@ -2,38 +2,30 @@ use crate::{bail, Aoc, Day04, Result};
 
 impl Aoc<u32> for Day04 {
     fn part1(&self, lines: &[&[u8]]) -> Result<u32> {
-        return part1(lines);
+        lines
+            .iter()
+            .map(|l| {
+                if let [a, b, x, y] = parse_line(l)?[..] {
+                    Ok(u32::from((a <= x && y <= b) || (x <= a && b <= y)))
+                } else {
+                    bail!("parse error")
+                }
+            })
+            .sum()
     }
     fn part2(&self, lines: &[&[u8]]) -> Result<u32> {
-        return part2(lines);
-    }
-}
-
-pub fn part1(lines: &[&[u8]]) -> Result<u32> {
-    lines
-        .iter()
-        .map(|l| {
+        let mut res = 0;
+        for l in lines {
             if let [a, b, x, y] = parse_line(l)?[..] {
-                Ok(u32::from((a <= x && y <= b) || (x <= a && b <= y)))
+                if (a <= x && x <= b) || (x <= a && a <= y) {
+                    res += 1;
+                }
             } else {
-                bail!("parse error")
+                bail!("parse error");
             }
-        })
-        .sum()
-}
-
-pub fn part2(lines: &[&[u8]]) -> Result<u32> {
-    let mut res = 0;
-    for l in lines {
-        if let [a, b, x, y] = parse_line(l)?[..] {
-            if (a <= x && x <= b) || (x <= a && a <= y) {
-                res += 1;
-            }
-        } else {
-            bail!("parse error");
         }
+        Ok(res)
     }
-    Ok(res)
 }
 
 fn parse_line(line: &[u8]) -> Result<Vec<u32>> {
