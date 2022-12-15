@@ -28,9 +28,7 @@ impl Aoc for Day15 {
             .map(|line| parse_line(std::str::from_utf8(line)?))
             .collect::<Result<_>>()?;
 
-        if let Some(res) = search_beacon::<4000000>(20, &data) {
-            return result!(res);
-        } else if let Some(res) = search_beacon::<4000000>(4000000, &data) {
+        if let Some(res) = search_beacon::<4000000>(&data) {
             return result!(res);
         }
 
@@ -61,25 +59,39 @@ fn ball_cut(row: i32, (sx, sy): (i32, i32), r: usize) -> Option<(i32, i32)> {
 
 // assumes a sorted, non-empty input
 fn fuse_segments(segments: &[(i32, i32)]) -> Vec<(i32, i32)> {
-    let mut v = vec![];
+    let mut v: Vec<(i32,i32)> = vec![];
 
-    let mut i: usize = 0;
+    let mut p = segments[0];
 
-    while i < segments.len() {
-        let (left, mut right) = segments[i];
-        let mut j = i + 1;
-        while j < segments.len() {
-            if segments[j].0 > right + 1 {
-                break;
-            }
-            right = right.max(segments[j].1);
-            j += 1;
+    for &q in &segments[1..] {
+        if q.0 <= p.1 + 1 {
+            p.1 = p.1.max(q.1);
+        } else {
+            println!("{:?}", p);
+            v.push(p);
+            p = q;
         }
-        v.push((left, right));
-        i = j;
     }
 
+    // println!("{:?}", p);
+    v.push(p);
+
     v
+}
+
+// assumes a sorted, non-empty input
+fn first_segment(segments: &[(i32, i32)]) -> Option<(i32, i32)> {
+    let mut p = segments[0];
+
+    for &q in &segments[1..] {
+        if q.0 <= p.1 + 1 {
+            p.1 = p.1.max(q.1);
+        } else {
+            return Some(p);
+        }
+    }
+
+    None
 }
 
 fn forbidden(y: i32, data: &[[(i32, i32); 2]]) -> usize {
@@ -96,6 +108,8 @@ fn forbidden(y: i32, data: &[[(i32, i32); 2]]) -> usize {
         }
     }
 
+    if segments.is_empty() { return 0; }
+
     segments.sort_unstable();
     let segments = fuse_segments(&segments);
 
@@ -109,15 +123,15 @@ fn forbidden(y: i32, data: &[[(i32, i32); 2]]) -> usize {
             .count()
 }
 
-fn search_beacon<const MULT: usize>(max_search: usize, data: &[[(i32, i32); 2]]) -> Option<usize> {
-    for y in 0..=max_search {
+fn search_beacon<const MULT: usize>(data: &[[(i32, i32); 2]]) -> Option<usize> {
+    for y in 0..=MULT {
         let mut segments = vec![];
 
         for &[s, b] in data {
             let rad = manhattan(s, b);
             if let Some((l, r)) = ball_cut(y as i32, s, rad) {
                 let l = l.max(0);
-                let r = r.min(max_search as i32);
+                let r = r.min(MULT as i32);
                 if l <= r {
                     segments.push((l, r));
                 }
@@ -125,12 +139,9 @@ fn search_beacon<const MULT: usize>(max_search: usize, data: &[[(i32, i32); 2]])
         }
 
         segments.sort_unstable();
-        let segments = fuse_segments(&segments);
-        let (l, r) = segments[0];
-        if l > 0 {
-            return Some(y);
-        } else if r < max_search as i32 {
-            return Some(MULT * (r as usize + 1) + y);
+
+        if let Some((_,r)) = first_segment(&segments) {
+            return Some(MULT * (r as usize +1) + y);
         }
     }
 

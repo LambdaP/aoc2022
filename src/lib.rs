@@ -1,5 +1,6 @@
 use color_eyre::eyre::*;
 use std::fmt::Display;
+use std::time::Duration;
 
 macro_rules! result {
     ($res: expr) => {
@@ -47,11 +48,15 @@ pub trait Aoc {
 
         let lines = byte_lines(&input);
 
+        let t0 = std::time::SystemTime::now();
         let res1 = self.part1(&lines);
+        let t1 = t0.elapsed();
+        let t0 = std::time::SystemTime::now();
         let res2 = self.part2(&lines);
+        let t2 = t0.elapsed();
 
-        println!("part 1: {}", res1?);
-        println!("part 2: {}", res2?);
+        println!("part 1: {} ({:?})", res1?, t1?);
+        println!("part 2: {} ({:?})", res2?, t2?);
 
         Ok(())
     }
