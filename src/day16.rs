@@ -33,9 +33,13 @@ impl Aoc for Day16 {
                 let mut ls: Vec<Arc<usize>> = vs
                     .into_iter()
                     .map(|v| valves.binary_search(&v).unwrap())
-                    .map(|dst| Arc { src:i, dst, cost: 1 })
+                    .map(|dst| Arc {
+                        src: i,
+                        dst,
+                        cost: 1,
+                    })
                     .collect();
-                ls.sort_unstable_by_key(|&Arc {dst, ..}| dst);
+                ls.sort_unstable_by_key(|&Arc { dst, .. }| dst);
                 ls
             })
             .collect();
@@ -45,59 +49,106 @@ impl Aoc for Day16 {
             weights: rates,
         };
 
-        let mut positive_valves: Vec<usize> =
-            [0].into_iter().chain(
-            (0..)
-            .zip(gr.weights.iter())
-            .filter_map(|(i, &r)| (r > 0).then_some(i)))
+        let positive_valves: Vec<usize> = [0]
+            .into_iter()
+            .chain(
+                (0..)
+                    .zip(gr.weights.iter())
+                    .filter_map(|(i, &r)| (r > 0).then_some(i)),
+            )
             .collect::<Vec<_>>();
 
-        // positive_valves.push(0);
-
-        let mut distances = vec![vec![0;gr.weights.len()];gr.weights.len()];
+        let mut distances = vec![vec![0; gr.weights.len()]; gr.weights.len()];
 
         for Arc { src, dst, cost } in distance_clique(&gr, &positive_valves) {
             distances[src][dst] = cost;
             distances[dst][src] = cost;
         }
 
+        let res = best_permutation(30, &distances, &gr.weights, &positive_valves);
 
-
-        for i in 0..distances.len() {
-            if distances[i].iter().all(|&x| x == 0) {
-                continue;
-            }
-            print!("{i:>2}: ({w:>2}) ", w=gr.weights[i]);
-            for j in 0..distances[i].len() {
-                // print!("{x:>3} ", x=distances[i][j]);
-                if i == j || distances[i][j] > 0 {
-                    print!("{x:>3} ", x=distances[i][j]);
-                }
-            }
-            println!("");
-        }
-
-        let res = foo(30, &distances, &gr.weights, &positive_valves);
-
-        let mut total_cost = 0;
-        for i in 1..res.1.len() {
-            let x = res.1[i-1];
-            let y = res.1[i];
-            let cost = distances[x][y];
-            total_cost += cost + 1;
-            println!("valve {x:>2} (ppm {ppm:>2}); path {x:>2} -> {y:>2} costs {cost:>2}", ppm=gr.weights[x], cost=cost);
-        }
-        let &last = res.1.last().unwrap();
-        println!("valve {x:>2} (ppm {ppm:>2}); {minutes:>2} minutes remaining", x=last, ppm=gr.weights[last], minutes=30-total_cost);
-        println!("path score: {x:>5}", x=score::<30>(&distances, &gr.weights, &res.1));
-
-
-        result!("todo")
+        result!(res.0)
     }
 
     fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
-        let lines = &input.byte_lines;
-        result!("todo")
+        let lines = &input.string_lines;
+        let mut data = lines
+            .into_iter()
+            .map(|l| parse_line(l))
+            .collect::<Result<Vec<_>>>()?;
+        data.sort_unstable_by(|x, y| x.0.cmp(&y.0));
+
+        let mut valves = vec![];
+        let mut rates: Vec<usize> = vec![];
+
+        for &(v, (r, _)) in &data {
+            valves.push(v);
+            rates.push(r);
+        }
+
+        let arcs: Vec<Vec<Arc<usize>>> = data
+            .into_iter()
+            .enumerate()
+            .map(|(i, (_, (_, vs)))| {
+                let mut ls: Vec<Arc<usize>> = vs
+                    .into_iter()
+                    .map(|v| valves.binary_search(&v).unwrap())
+                    .map(|dst| Arc {
+                        src: i,
+                        dst,
+                        cost: 1,
+                    })
+                    .collect();
+                ls.sort_unstable_by_key(|&Arc { dst, .. }| dst);
+                ls
+            })
+            .collect();
+
+        let gr = Graph {
+            arcs,
+            weights: rates,
+        };
+
+        let mut positive_valves: Vec<usize> = (0..)
+            .zip(gr.weights.iter())
+            .filter_map(|(i, &r)| (r > 0).then_some(i))
+            .collect::<Vec<_>>();
+
+        let mut distances = vec![vec![0; gr.weights.len()]; gr.weights.len()];
+
+        positive_valves.push(0);
+
+        for Arc { src, dst, cost } in distance_clique(&gr, &positive_valves) {
+            distances[src][dst] = cost;
+            distances[dst][src] = cost;
+        }
+
+        positive_valves.pop();
+
+        let mut res = 0;
+
+        for mut partition in 0..2_usize.pow(positive_valves.len() as u32 - 1) {
+            let mut my_valves = vec![0];
+            let mut el_valves = vec![0];
+
+            for &valve in &positive_valves {
+                if partition & 1 == 1 {
+                    my_valves.push(valve);
+                } else {
+                    el_valves.push(valve);
+                }
+                partition >>= 1;
+            }
+
+            let mine = best_permutation(26, &distances, &gr.weights, &my_valves);
+            let elephant = best_permutation(26, &distances, &gr.weights, &el_valves);
+            let total = mine.0 + elephant.0;
+            if res < total {
+                res = total;
+            }
+        }
+
+        result!(res)
     }
 }
 
@@ -197,121 +248,34 @@ fn distance_clique(gr: &Graph, targets: &[usize]) -> Vec<Arc<usize>> {
             }
         }
 
-        for arc in paths.into_iter().map(|p| Arc { src: p.first().unwrap().src,
-                dst: p.last().unwrap().dst,
-                cost: p.len(),
-            }) {
+        for arc in paths.into_iter().map(|p| Arc {
+            src: p.first().unwrap().src,
+            dst: p.last().unwrap().dst,
+            cost: p.len(),
+        }) {
             res.push(arc);
         }
-
     }
 
     res
 }
 
-fn paths_to(gr: &Graph, source: usize, targets: &[usize]) -> Vec<Vec<Arc<usize>>> {
-    #[derive(Eq, PartialEq, Copy, Clone)]
-    struct TS {
-        vert: usize,
-        cost: usize,
-        score: usize,
-    }
-
-    impl Ord for TS {
-        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-            other
-                .cost
-                .cmp(&self.cost)
-                .then_with(|| self.score.cmp(&other.score))
-                .then_with(|| self.vert.cmp(&other.vert))
-        }
-    }
-
-    impl PartialOrd for TS {
-        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
-    let mut visited = vec![vec![]; gr.arcs.len()];
-    let mut to_process: Heap<TS> = Heap::new();
-
-    to_process.push(TS {
-        vert: source,
-        cost: 0,
-        score: gr.weights[source],
-    });
-
-    let mut res = vec![];
-
-    while let Some(TS {
-        vert: v, cost: c, ..
-    }) = to_process.pop()
-    {
-        if targets.iter().any(|&t| t == v) {
-            res.push(visited[v].clone());
-        }
-
-        if res.len() == targets.len() {
-            break;
-        }
-
-        for &a in &gr.arcs[v] {
-            let Arc { dst, cost, .. } = a;
-            if dst != source && visited[dst].is_empty() {
-                visited[dst] = visited[v].clone();
-                visited[dst].push(a);
-                to_process.push(TS {
-                    vert: dst,
-                    cost: c + cost,
-                    score: gr.weights[dst],
-                });
-            }
-        }
-    }
-
-    res.sort_unstable_by(|x, y| x.cmp(&y));
-    res
-}
-
-fn is_prefix<T: Eq>(a: &[T], b: &[T]) -> bool {
-    if b.len() < a.len() || a.len() == 0 {
-        return false;
-    }
-
-    a.iter().zip(b.iter()).all(|(x, y)| x == y)
-}
-
-fn score<const LIMIT: usize>(distances: &[Vec<usize>], weights: &[usize], path: &[usize]) -> usize {
-    let mut res = 0;
-
-    let mut remaining = LIMIT;
-
-    for w in path.windows(2) {
-        let &[src,dst] = &w[..] else {
-            panic!();
-        };
-
-        let dist = distances[src][dst] + 1;
-
-        if dist >= remaining {
-            panic!();
-        }
-
-        remaining -= dist;
-
-        res += weights[dst] * remaining;
-    }
-
-    res
-}
-
-fn foo(limit: usize, distances: &[Vec<usize>], weights: &[usize], v: &[usize]) -> (usize, Vec<usize>) {
-    fn bar(distances: &[Vec<usize>], weights: &[usize], v: &mut [usize], remaining: usize) -> (usize, Vec<usize>) {
+fn best_permutation(
+    limit: usize,
+    distances: &[Vec<usize>],
+    weights: &[usize],
+    v: &[usize],
+) -> (usize, Vec<usize>) {
+    fn permute(
+        distances: &[Vec<usize>],
+        weights: &[usize],
+        v: &mut [usize],
+        remaining: usize,
+    ) -> (usize, Vec<usize>) {
         let mut score = 0;
         let mut path = vec![];
         if v.is_empty() {
-            return (score,path);
+            return (score, path);
         }
 
         let v0 = v[0];
@@ -340,7 +304,7 @@ fn foo(limit: usize, distances: &[Vec<usize>], weights: &[usize], v: &[usize]) -
             v[i] = v1;
             v[1] = vi;
 
-            let sub = bar(distances, weights, &mut v[1..], remaining);
+            let sub = permute(distances, weights, &mut v[1..], remaining);
             subs.push(sub);
 
             v[i] = vi;
@@ -354,8 +318,8 @@ fn foo(limit: usize, distances: &[Vec<usize>], weights: &[usize], v: &[usize]) -
         score += sub_score;
         path.append(&mut sub_path);
 
-
         (score, path)
     }
-    bar(distances, weights, &mut v.to_vec(), limit)
+
+    permute(distances, weights, &mut v.to_vec(), limit)
 }
