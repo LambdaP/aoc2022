@@ -1,4 +1,4 @@
-use crate::{bail, Aoc, Day14, Result};
+use crate::{bail, Aoc, Day14, FileRep, Result};
 use std::fmt::Display;
 
 // dummy input:
@@ -15,7 +15,8 @@ enum Square {
 use Square::*;
 
 impl Aoc for Day14 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let mut paths: Vec<Vec<(usize, usize)>> =
             lines.iter().map(|l| parse_line(l)).collect::<Result<_>>()?;
 
@@ -44,7 +45,8 @@ impl Aoc for Day14 {
         result!(res)
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let mut paths: Vec<Vec<(usize, usize)>> =
             lines.iter().map(|l| parse_line(l)).collect::<Result<_>>()?;
 

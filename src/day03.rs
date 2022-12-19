@@ -1,7 +1,8 @@
-use crate::{Aoc, Day03, Display, Result};
+use crate::{Aoc, Day03, Display, FileRep, Result};
 
 impl Aoc for Day03 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let mut res = 0;
         for l in lines {
             let mut count: Vec<u32> = vec![0; 128];
@@ -24,7 +25,8 @@ impl Aoc for Day03 {
         result!(res)
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let mut res = 0;
         for ll in lines.chunks(3) {
             let mut counts: Vec<Vec<u32>> = Vec::new();

@@ -1,6 +1,5 @@
 use crate::{bail, eyre, Aoc, Day16, FileRep, Result};
 use std::collections::BinaryHeap as Heap;
-use std::collections::VecDeque as Deque;
 use std::fmt::Display;
 
 // dummy input:
@@ -46,58 +45,54 @@ impl Aoc for Day16 {
             weights: rates,
         };
 
-        let mut positive_valves: Vec<usize> = (0..)
+        let mut positive_valves: Vec<usize> =
+            [0].into_iter().chain(
+            (0..)
             .zip(gr.weights.iter())
-            .filter_map(|(i, &r)| (r > 0).then_some(i))
+            .filter_map(|(i, &r)| (r > 0).then_some(i)))
             .collect::<Vec<_>>();
 
-        positive_valves.push(0);
+        // positive_valves.push(0);
 
-        let mut contracted_arcs: Vec<Vec<Arc<usize>>> = vec![vec![];gr.arcs.len()];
+        let mut distances = vec![vec![0;gr.weights.len()];gr.weights.len()];
 
-        for a in positive_valves
-            .iter()
-            .flat_map(|&v| {
-                let mut paths = paths_to(&gr, v, &positive_valves);
-                // paths.dedup_by(|x, y| is_prefix(&y, &x));
-                paths
-            })
-            .filter(|p| !p.is_empty())
-            .map(|p| Arc {
-                src: p.first().unwrap().src,
-                dst: p.last().unwrap().dst,
-                cost: p.len(),
-            })
-            {
-                contracted_arcs[a.src].push(a);
-            }
-
-        for foo in &contracted_arcs {
-            if !foo.is_empty() {
-                println!("valve {:?}: pressure: {:?}, paths: {:?}", foo[0].src, gr.weights[foo[0].src], foo);
-            }
+        for Arc { src, dst, cost } in distance_clique(&gr, &positive_valves) {
+            distances[src][dst] = cost;
+            distances[dst][src] = cost;
         }
 
-        let contracted = Graph {
-            arcs: contracted_arcs,
-            weights: gr.weights
-        };
-
-        let res = exhaustive_search::<4>(&contracted, 0);
-
-        result!(res)
 
 
+        for i in 0..distances.len() {
+            if distances[i].iter().all(|&x| x == 0) {
+                continue;
+            }
+            print!("{i:>2}: ({w:>2}) ", w=gr.weights[i]);
+            for j in 0..distances[i].len() {
+                // print!("{x:>3} ", x=distances[i][j]);
+                if i == j || distances[i][j] > 0 {
+                    print!("{x:>3} ", x=distances[i][j]);
+                }
+            }
+            println!("");
+        }
 
-        // for v in paths_to(&gr, 0, &positive_valves) {
-        //     let score = path_pressure(30, &gr.weights, &v);
-        //     println!("Score {:?} for path {:?}", score, v);
-        // }
+        let res = foo(30, &distances, &gr.weights, &positive_valves);
 
-        // let positive_valves = (0..).zip(rates.into_iter()).filter_map(|(i,r)| (r > 0).then_some(i));
-        // todo!();
+        let mut total_cost = 0;
+        for i in 1..res.1.len() {
+            let x = res.1[i-1];
+            let y = res.1[i];
+            let cost = distances[x][y];
+            total_cost += cost + 1;
+            println!("valve {x:>2} (ppm {ppm:>2}); path {x:>2} -> {y:>2} costs {cost:>2}", ppm=gr.weights[x], cost=cost);
+        }
+        let &last = res.1.last().unwrap();
+        println!("valve {x:>2} (ppm {ppm:>2}); {minutes:>2} minutes remaining", x=last, ppm=gr.weights[last], minutes=30-total_cost);
+        println!("path score: {x:>5}", x=score::<30>(&distances, &gr.weights, &res.1));
 
-        // result!("todo")
+
+        result!("todo")
     }
 
     fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
@@ -124,25 +119,6 @@ fn parse_line(line: &str) -> Result<(u16, (usize, Vec<u16>))> {
     Ok((valve(ll), (lr.parse()?, r)))
 }
 
-fn path_pressure(nrounds: usize, rates: &[usize], path: &[Arc<usize>]) -> usize {
-    let mut res = 0;
-    let mut remaining = nrounds;
-    for &Arc { dst, cost, .. } in path {
-        if remaining < cost {
-            break;
-        }
-        remaining -= cost;
-        res += rates[dst] * remaining;
-    }
-    // path.into_iter().
-    // (0..nrounds)
-    //     .rev()
-    //     .zip(path.into_iter())
-    //     .map(|(i, &v)| i * rates[v] as usize)
-    //     .sum()
-    res
-}
-
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 struct Arc<T> {
     src: T,
@@ -153,6 +129,84 @@ struct Arc<T> {
 struct Graph {
     arcs: Vec<Vec<Arc<usize>>>,
     weights: Vec<usize>,
+}
+
+fn distance_clique(gr: &Graph, targets: &[usize]) -> Vec<Arc<usize>> {
+    let mut targets = targets.to_vec();
+
+    #[derive(Eq, PartialEq, Copy, Clone)]
+    struct TS {
+        vert: usize,
+        cost: usize,
+        score: usize,
+    }
+
+    impl Ord for TS {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            other
+                .cost
+                .cmp(&self.cost)
+                .then_with(|| self.score.cmp(&other.score))
+                .then_with(|| self.vert.cmp(&other.vert))
+        }
+    }
+
+    impl PartialOrd for TS {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    let mut res = vec![];
+
+    while let Some(source) = targets.pop() {
+        let mut visited = vec![vec![]; gr.arcs.len()];
+        let mut to_process: Heap<TS> = Heap::new();
+
+        to_process.push(TS {
+            vert: source,
+            cost: 0,
+            score: gr.weights[source],
+        });
+
+        let mut paths = vec![];
+
+        while let Some(TS {
+            vert: v, cost: c, ..
+        }) = to_process.pop()
+        {
+            if targets.iter().any(|&t| t == v) {
+                paths.push(visited[v].clone());
+            }
+
+            if paths.len() == targets.len() {
+                break;
+            }
+
+            for &a in &gr.arcs[v] {
+                let Arc { dst, cost, .. } = a;
+                if dst != source && visited[dst].is_empty() {
+                    visited[dst] = visited[v].clone();
+                    visited[dst].push(a);
+                    to_process.push(TS {
+                        vert: dst,
+                        cost: c + cost,
+                        score: gr.weights[dst],
+                    });
+                }
+            }
+        }
+
+        for arc in paths.into_iter().map(|p| Arc { src: p.first().unwrap().src,
+                dst: p.last().unwrap().dst,
+                cost: p.len(),
+            }) {
+            res.push(arc);
+        }
+
+    }
+
+    res
 }
 
 fn paths_to(gr: &Graph, source: usize, targets: &[usize]) -> Vec<Vec<Arc<usize>>> {
@@ -180,7 +234,6 @@ fn paths_to(gr: &Graph, source: usize, targets: &[usize]) -> Vec<Vec<Arc<usize>>
     }
 
     let mut visited = vec![vec![]; gr.arcs.len()];
-    // visited[source].push(source);
     let mut to_process: Heap<TS> = Heap::new();
 
     to_process.push(TS {
@@ -229,43 +282,80 @@ fn is_prefix<T: Eq>(a: &[T], b: &[T]) -> bool {
     a.iter().zip(b.iter()).all(|(x, y)| x == y)
 }
 
-fn exhaustive_search<const LIMIT: usize>(gr: &Graph, source: usize) -> usize {
+fn score<const LIMIT: usize>(distances: &[Vec<usize>], weights: &[usize], path: &[usize]) -> usize {
     let mut res = 0;
-    let mut stack = vec![gr.arcs[source].clone()];
-    let mut path = vec![Arc { src: source, dst: source, cost: 0}];
-    while let Some(mut arcs) = stack.pop() {
-        let Some(arc) = arcs.pop() else {
-            let pressure = path_pressure(LIMIT, &gr.weights, &path);
-            res = if res < pressure { pressure } else { res };
 
-            path.pop();
+    let mut remaining = LIMIT;
 
-            continue;
+    for w in path.windows(2) {
+        let &[src,dst] = &w[..] else {
+            panic!();
         };
 
-        stack.push(arcs);
+        let dist = distances[src][dst] + 1;
 
-        let path_cost: usize = path.iter().map(|&a| a.cost).sum();
-
-        if path_cost + arc.cost < LIMIT {
-            path.push(arc);
-            stack.push(gr.arcs[arc.dst].clone());
+        if dist >= remaining {
+            panic!();
         }
+
+        remaining -= dist;
+
+        res += weights[dst] * remaining;
     }
 
     res
 }
 
-// fn dfs_all_covering_paths(gr: &Graph, source: usize, targets: &[usize], limit: usize) {
-//     let mut head = source;
-//     let mut res = vec![];
-//
-//
-// }
+fn foo(limit: usize, distances: &[Vec<usize>], weights: &[usize], v: &[usize]) -> (usize, Vec<usize>) {
+    fn bar(distances: &[Vec<usize>], weights: &[usize], v: &mut [usize], remaining: usize) -> (usize, Vec<usize>) {
+        let mut score = 0;
+        let mut path = vec![];
+        if v.is_empty() {
+            return (score,path);
+        }
 
-// fn covering_paths<const LIMIT: usize>(arcs: Vec<Vec<Arc<usize>>>, source: usize) -> Vec<Vec<Arc<usize>>> {
-//     let mut vert_stack = vec![source];
-//     let mut res = vec![];
-//
-//     res
-// }
+        let v0 = v[0];
+
+        score += remaining * weights[v0];
+        path.push(v0);
+
+        if v.len() == 1 {
+            return (score, path);
+        }
+
+        let mut subs = vec![];
+
+        for i in 1..v.len() {
+            let v1 = v[1];
+            let vi = v[i];
+
+            let dist = distances[v0][vi] + 1;
+
+            if remaining <= dist {
+                continue;
+            }
+
+            let remaining = remaining - dist;
+
+            v[i] = v1;
+            v[1] = vi;
+
+            let sub = bar(distances, weights, &mut v[1..], remaining);
+            subs.push(sub);
+
+            v[i] = vi;
+            v[1] = v1;
+        }
+
+        let Some((sub_score, mut sub_path)) = subs.into_iter().max_by_key(|x| x.0) else {
+            return (score, path);
+        };
+
+        score += sub_score;
+        path.append(&mut sub_path);
+
+
+        (score, path)
+    }
+    bar(distances, weights, &mut v.to_vec(), limit)
+}

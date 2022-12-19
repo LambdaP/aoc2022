@@ -1,4 +1,4 @@
-use crate::{bail, eyre, Aoc, Day13, Result};
+use crate::{bail, eyre, Aoc, Day13, FileRep, Result};
 use std::fmt::Display;
 
 #[derive(Eq, PartialEq, Clone)]
@@ -31,7 +31,8 @@ where
 }
 
 impl Aoc for Day13 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let pairs = parse(lines)?;
         let res: usize = pairs
             .into_iter()
@@ -41,7 +42,8 @@ impl Aoc for Day13 {
         result!(res)
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let pairs = parse(lines)?;
         let mut lists = pairs
             .into_iter()

@@ -1,7 +1,8 @@
-use crate::{bail, Aoc, Day06, Display, Result};
+use crate::{bail, Aoc, Day06, Display, FileRep, Result};
 
 impl Aoc for Day06 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let l = lines[0];
         let mut count = 4;
         for w in l.windows(4) {
@@ -13,7 +14,8 @@ impl Aoc for Day06 {
         bail!("No result could be found");
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let l = lines[0];
         let mut count = 14;
         for w in l.windows(14) {

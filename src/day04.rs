@@ -1,7 +1,8 @@
-use crate::{bail, Aoc, Day04, Display, Result};
+use crate::{bail, Aoc, Day04, Display, FileRep, Result};
 
 impl Aoc for Day04 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let res: Result<u32> = lines
             .iter()
             .map::<Result<u32>, _>(|l| {
@@ -14,7 +15,8 @@ impl Aoc for Day04 {
         result!(res?)
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let mut res = 0;
         for l in lines {
             if let [a, b, x, y] = parse_line(l)?[..] {

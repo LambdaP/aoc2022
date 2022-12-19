@@ -1,8 +1,9 @@
-use crate::{Aoc, Day08, Display, Result};
+use crate::{Aoc, Day08, Display, FileRep, Result};
 use std::collections::hash_set::HashSet as Set;
 
 impl Aoc for Day08 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let height = lines.len();
         let width = lines[0].len();
         let mut visible = Set::<(usize, usize)>::new();
@@ -54,7 +55,8 @@ impl Aoc for Day08 {
         result!(visible.len())
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let height = lines.len();
         let width = lines[0].len();
 

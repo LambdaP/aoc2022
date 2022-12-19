@@ -1,10 +1,12 @@
-use crate::{bail, eyre, Aoc, Day02, Display, Result};
+use crate::{bail, eyre, Aoc, Day02, Display, FileRep, Result};
 
 impl Aoc for Day02 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         result!(score(parse_part1(lines)?))
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         result!(score(parse_part2(lines)?))
     }
 }

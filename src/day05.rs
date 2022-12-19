@@ -1,7 +1,8 @@
-use crate::{eyre, Aoc, Day05, Display, Result};
+use crate::{eyre, Aoc, Day05, Display, FileRep, Result};
 
 impl Aoc for Day05 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let mut parsed = None;
         for i in 0..lines.len() {
             if lines[i].is_empty() {
@@ -30,7 +31,8 @@ impl Aoc for Day05 {
         result!(res)
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let mut parsed = None;
         for i in 0..lines.len() {
             if lines[i].is_empty() {

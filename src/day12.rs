@@ -1,4 +1,4 @@
-use crate::{eyre, Aoc, Day12, Result};
+use crate::{eyre, Aoc, Day12, FileRep, Result};
 use std::collections::hash_set::HashSet as Set;
 use std::collections::BinaryHeap as Heap;
 use std::collections::HashMap as Map;
@@ -33,7 +33,8 @@ impl PartialOrd for State {
 }
 
 impl Aoc for Day12 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let (start, end) = locate_start_end(lines).unwrap();
 
         let paths = dijkstra(lines, start, |cur_el, el| el <= cur_el + 1);
@@ -44,7 +45,8 @@ impl Aoc for Day12 {
         result!(*res)
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let (_, end) = locate_start_end(lines).unwrap();
 
         let paths = dijkstra(lines, end, |cur_el, el| cur_el <= el + 1);

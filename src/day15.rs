@@ -1,4 +1,4 @@
-use crate::{bail, eyre, Aoc, Day15, Result};
+use crate::{bail, eyre, Aoc, Day15, FileRep, Result};
 use std::collections::BTreeSet as Set;
 use std::fmt::Display;
 
@@ -10,10 +10,11 @@ use std::fmt::Display;
 // (...)
 
 impl Aoc for Day15 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.string_lines;
         let data: Vec<[(i32, i32); 2]> = lines
             .iter()
-            .map(|line| parse_line(std::str::from_utf8(line)?))
+            .map(|line| parse_line(line))
             .collect::<Result<_>>()?;
 
         let f10 = forbidden(10, &data);
@@ -22,10 +23,11 @@ impl Aoc for Day15 {
         result!(format!("\n10: {}\n2000000: {}", f10, f2000000))
     }
 
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.string_lines;
         let data: Vec<[(i32, i32); 2]> = lines
             .iter()
-            .map(|line| parse_line(std::str::from_utf8(line)?))
+            .map(|line| parse_line(line))
             .collect::<Result<_>>()?;
 
         if let Some(res) = search_beacon::<4000000>(&data) {
@@ -48,18 +50,18 @@ fn parse_line(line: &str) -> Result<[(i32, i32); 2]> {
     Ok([parse_pair(&l[10..])?, parse_pair(&r[21..])?])
 }
 
-fn manhattan(p1: (i32, i32), p2: (i32, i32)) -> usize {
-    (p1.0 - p2.0).unsigned_abs() as usize + (p1.1 - p2.1).unsigned_abs() as usize
+fn manhattan(p1: (i32, i32), p2: (i32, i32)) -> i32 {
+    (p1.0 - p2.0).abs() + (p1.1 - p2.1).abs()
 }
 
-fn ball_cut(row: i32, (sx, sy): (i32, i32), r: usize) -> Option<(i32, i32)> {
-    r.checked_sub((sy - row).unsigned_abs() as usize)
+fn ball_cut(row: i32, (sx, sy): (i32, i32), r: i32) -> Option<(i32, i32)> {
+    r.checked_sub((sy - row).abs())
         .map(|rx| (sx - rx as i32, sx + rx as i32))
 }
 
 // assumes a sorted, non-empty input
 fn fuse_segments(segments: &[(i32, i32)]) -> Vec<(i32, i32)> {
-    let mut v: Vec<(i32,i32)> = vec![];
+    let mut v: Vec<(i32, i32)> = vec![];
 
     let mut p = segments[0];
 
@@ -67,13 +69,11 @@ fn fuse_segments(segments: &[(i32, i32)]) -> Vec<(i32, i32)> {
         if q.0 <= p.1 + 1 {
             p.1 = p.1.max(q.1);
         } else {
-            println!("{:?}", p);
             v.push(p);
             p = q;
         }
     }
 
-    // println!("{:?}", p);
     v.push(p);
 
     v
@@ -108,7 +108,9 @@ fn forbidden(y: i32, data: &[[(i32, i32); 2]]) -> usize {
         }
     }
 
-    if segments.is_empty() { return 0; }
+    if segments.is_empty() {
+        return 0;
+    }
 
     segments.sort_unstable();
     let segments = fuse_segments(&segments);
@@ -123,15 +125,15 @@ fn forbidden(y: i32, data: &[[(i32, i32); 2]]) -> usize {
             .count()
 }
 
-fn search_beacon<const MULT: usize>(data: &[[(i32, i32); 2]]) -> Option<usize> {
-    for y in 0..=MULT {
+fn search_beacon<const MULT: i32>(data: &[[(i32, i32); 2]]) -> Option<usize> {
+    for y in 0..=MULT as i32 {
         let mut segments = vec![];
 
         for &[s, b] in data {
             let rad = manhattan(s, b);
-            if let Some((l, r)) = ball_cut(y as i32, s, rad) {
+            if let Some((l, r)) = ball_cut(y, s, rad) {
                 let l = l.max(0);
-                let r = r.min(MULT as i32);
+                let r = r.min(MULT);
                 if l <= r {
                     segments.push((l, r));
                 }
@@ -140,8 +142,8 @@ fn search_beacon<const MULT: usize>(data: &[[(i32, i32); 2]]) -> Option<usize> {
 
         segments.sort_unstable();
 
-        if let Some((_,r)) = first_segment(&segments) {
-            return Some(MULT * (r as usize +1) + y);
+        if let Some((_, r)) = first_segment(&segments) {
+            return Some(MULT as usize * (r as usize + 1) + y as usize);
         }
     }
 

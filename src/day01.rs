@@ -1,10 +1,12 @@
-use crate::{Aoc, Day01, Display, Result};
+use crate::{Aoc, Day01, Display, FileRep, Result};
 
 impl Aoc for Day01 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         result!(parse(lines)?.into_iter().max().unwrap())
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let mut elves: Vec<u32> = parse(lines)?;
         elves.sort_unstable();
         result!(elves.into_iter().rev().take(3).sum::<u32>())

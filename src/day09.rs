@@ -1,13 +1,16 @@
-use crate::{bail, Aoc, Day09, Display, Result};
+use crate::{bail, Aoc, Day09, Display, FileRep, Result};
 use std::collections::hash_set::HashSet as Set;
 
 impl Aoc for Day09 {
-    fn part1(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+    fn part1(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let moves = parse(lines)?;
         let res = run_nknots::<2>(&moves);
         result!(res)
     }
-    fn part2(&self, lines: &[&[u8]]) -> Result<Box<dyn Display>> {
+
+    fn part2(&self, input: &FileRep) -> Result<Box<dyn Display>> {
+        let lines = &input.byte_lines;
         let moves = parse(lines)?;
         let res = run_nknots::<10>(&moves);
         result!(res)
